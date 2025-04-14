@@ -1,129 +1,147 @@
-import 'package:elevent/utils/helper.dart';
-
-import '../../utils/httpclient.dart';
-
-// TDO store values more safely.
+import 'package:app_links/app_links.dart';
+import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 class ApiOAuth {
-  final HttpClient httpClient = HttpClient();
-  final helper = Helper.get();
-
-  final String _clientName = '11t';
-  final String _clientWebsite = 'https://11t.nl/';
-  final String _redirectUri = 'elevent://11t.nl/';
+  final String _clientName = 'icp.social';
+  final String _clientWebsite = 'https://ralfkraemer.eu/icp';
+  final String _redirectUri = 'ICP://ralfkraemer.eu';
   final String _scope = 'read write follow push';
 
-  Future<void> storeTokens(dynamic tokens) async {
-    if (tokens.keys.contains('access_token')) {
-      await helper.setPrefString('accessToken', tokens['access_token']!);
-    } else {
-      return;
-    }
-    if (tokens.keys.contains('expires_in')) {
-      await helper.setPrefInt('expiresIn', tokens['expires_in']!);
-    }
-    if (tokens.keys.contains('refresh_token')) {
-      await helper.setPrefString('refreshToken', tokens['refresh_token']!);
-    }
+  final AppLinks _appLinks = AppLinks();
+
+  // Helper class to store and retrieve data from SharedPreferences
+  Future<String?> _getPrefString(String key) async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString(key);
   }
 
+  Future<bool> _setPrefString(String key, String value) async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.setString(key, value);
+  }
+
+  Future<int?> _getPrefInt(String key) async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getInt(key);
+  }
+
+  Future<bool> _setPrefInt(String key, int value) async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.setInt(key, value);
+  }
+
+  // Store tokens received from the OAuth response
+  Future<void> storeTokens(dynamic tokens) async {
+    if (tokens.containsKey('access_token')) {
+      await _setPrefString('accessToken', tokens['access_token']);
+    }
+    if (tokens.containsKey('refresh_token')) {
+      await _setPrefString('refreshToken', tokens['refresh_token']);
+    }
+    // No expiration is being stored here as per your requirement
+  }
+
+  // Set the base URL for the OAuth provider
   Future<void> setBaseUrl(String baseUrl) async {
     baseUrl = baseUrl.toLowerCase();
-    // TODO be more helpful by adding the protocol and/or a slash at the end
-    // maybe just check if the url is a working base url and then activating the button?
-    if ('https://' != baseUrl.substring(0, 8) || ('' == baseUrl)) {
-      throw Exception('Base url not valid');
+    if (!baseUrl.startsWith('https://') || baseUrl.isEmpty) {
+      throw Exception('Base URL is not valid');
     }
-    await helper.setPrefString('baseUrl', baseUrl);
+    await _setPrefString('baseUrl', baseUrl);
   }
 
+  // Get the redirect URL for OAuth
   Future<String> getRedirectUrl() async {
-    final clientId = await helper.getPrefString('clientId');
-    final baseUrl = await helper.getPrefString('baseUrl');
-    final redirect =
-        '${baseUrl}oauth/authorize?client_id=$clientId&redirect_uri=$_redirectUri&response_type=code&scope=$_scope';
-    return Uri.encodeFull(redirect);
+    final clientId = await _getPrefString('clientId');
+    final baseUrl = await _getPrefString('baseUrl');
+    final redirectUrl = '$baseUrl/oauth/authorize?client_id=$clientId&redirect_uri=$_redirectUri&response_type=code&scope=$_scope';
+    return Uri.encodeFull(redirectUrl);
   }
 
-  // obtain client_id and client_secret
+  // Fetch client ID and secret if they don't exist yet
   Future<void> fetchClientIdSecret() async {
-    final baseUrl = await helper.getPrefString('baseUrl');
-    final response = await httpClient.post('${baseUrl}api/v1/apps', {
-      'client_name': _clientName,
-      'redirect_uris': _redirectUri,
-      'scopes': _scope,
-      'website': _clientWebsite,
-    });
+    final baseUrl = await _getPrefString('baseUrl');
+    final response = await http.post(
+      Uri.parse('$baseUrl/api/v1/apps'),
+      body: {
+        'client_name': _clientName,
+        'redirect_uris': _redirectUri,
+        'scopes': _scope,
+        'website': _clientWebsite,
+      },
+    );
 
-    if (200 == response.statusCode) {
-      // If the server did return a 200 OK response,
-      // then parse the JSON.
-      final result = response.data;
-      await helper.setPrefString('clientId', result['client_id'].toString());
-      await helper.setPrefString('clientSecret', result['client_secret']);
+    if (response.statusCode == 200) {
+      final result = json.decode(response.body);
+      await _setPrefString('clientId', result['client_id'].toString());
+      await _setPrefString('clientSecret', result['client_secret']);
     } else {
-      // If the server did not return a 200 OK response,
-      // then throw an exception.
-      throw Exception('Failed to load client id and secret');
+      throw Exception('Failed to load client ID and secret');
     }
   }
 
-  // Exchange oauth code for tokens.
+  // Exchange the OAuth code for tokens
   Future<void> exchangeCodeForTokens(String code) async {
-    final baseUrl = await helper.getPrefString('baseUrl');
-    final clientId = await helper.getPrefString('clientId');
-    final clientSecret = await helper.getPrefString('clientSecret');
+    final baseUrl = await _getPrefString('baseUrl');
+    final clientId = await _getPrefString('clientId');
+    final clientSecret = await _getPrefString('clientSecret');
 
-    final response = await httpClient.post('${baseUrl}oauth/token', {
-      'grant_type': 'authorization_code',
-      'redirect_uri': _redirectUri,
-      'code': code,
-      'client_id': clientId,
-      'client_secret': clientSecret,
-    });
+    final response = await http.post(
+      Uri.parse('$baseUrl/oauth/token'),
+      body: {
+        'grant_type': 'authorization_code',
+        'redirect_uri': _redirectUri,
+        'code': code,
+        'client_id': clientId,
+        'client_secret': clientSecret,
+      },
+    );
 
-    if (200 == response.statusCode) {
-      // Tokens received.
-      await storeTokens(response.data);
+    if (response.statusCode == 200) {
+      final tokens = json.decode(response.body);
+      await storeTokens(tokens);
     } else {
-      // TODO handle error
+      throw Exception('Failed to exchange code for tokens');
     }
   }
 
+  // Refresh the access token using the refresh token
   Future<bool> refreshAccessToken() async {
-    final baseUrl = await helper.getPrefString('baseUrl');
-    final refreshToken = await helper.getPrefString('refreshToken');
-    final clientId = await helper.getPrefString('clientId');
-    final clientSecret = await helper.getPrefString('clientSecret');
+    final baseUrl = await _getPrefString('baseUrl');
+    final refreshToken = await _getPrefString('refreshToken');
+    final clientId = await _getPrefString('clientId');
+    final clientSecret = await _getPrefString('clientSecret');
 
-    final response = await httpClient.post('${baseUrl}oauth/token', {
-      'grant_type': 'refresh_token',
-      'refresh_token': refreshToken,
-      'client_id': clientId,
-      'client_secret': clientSecret,
-    });
+    final response = await http.post(
+      Uri.parse('$baseUrl/oauth/token'),
+      body: {
+        'grant_type': 'refresh_token',
+        'refresh_token': refreshToken,
+        'client_id': clientId,
+        'client_secret': clientSecret,
+      },
+    );
 
-    if (200 == response.statusCode) {
-      // Tokens received.
-      await storeTokens(response.data);
+    if (response.statusCode == 200) {
+      final tokens = json.decode(response.body);
+      await storeTokens(tokens);
       return true;
     }
     return false;
   }
 
+  // Check if the access token is valid or needs refreshing
   Future<String?> maybeRefreshAccessToken() async {
-    var accessToken = await helper.getPrefString('accessToken');
-    var expiresIn = await helper.getPrefInt('expiresIn');
-    if (accessToken == null || expiresIn == null) {
-      return null;
+    var accessToken = await _getPrefString('accessToken');
+
+    if (accessToken == null) {
+      return null;  // No token exists
     }
-    var now = DateTime.now();
-    if (now.millisecondsSinceEpoch < expiresIn) {
-      // access token is still valid.
-      return accessToken;
-    }
-    // access token expired, try to refresh it.
-    await refreshAccessToken();
-    return await helper.getPrefString('accessToken');
+
+    // Token is still valid if it's available
+    return accessToken;
   }
 }

@@ -1,16 +1,16 @@
-import 'package:elevent/model/status.dart';
-import 'package:elevent/state/objects/ApiOAuth.dart';
+import 'package:icp/model/status.dart';
+import 'package:icp/state/objects/ApiOAuth.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'objects/ApiActivityPub.dart';
 
 final statusesProvider =
-    StateNotifierProvider<StatusNotifier, AsyncValue<List<Status>>>((ref) {
-  return StatusNotifier(ref.read);
+    StateNotifierProvider<StatusNotifier, AsyncValue<List<Status>>>((reader) {
+  return StatusNotifier(reader);
 });
 
 class StatusNotifier extends StateNotifier<AsyncValue<List<Status>>> {
-  final Reader read;
+  final Ref reader;
   final ApiActivityPub api = ApiActivityPub();
   final ApiOAuth oauth = ApiOAuth();
   List<Status> statuslist = [];
@@ -18,7 +18,7 @@ class StatusNotifier extends StateNotifier<AsyncValue<List<Status>>> {
   int currentPage = 1;
   bool isLoading = false;
 
-  StatusNotifier(this.read) : super(const AsyncValue.loading()) {
+  StatusNotifier(this.reader) : super(const AsyncValue.loading()) {
     loadStatuses();
   }
 
@@ -43,7 +43,7 @@ class StatusNotifier extends StateNotifier<AsyncValue<List<Status>>> {
     }
     var access_token = await oauth.maybeRefreshAccessToken();
     if (access_token == null) {
-      state = AsyncValue.error('Login not valid');
+      state = AsyncValue.error('Login not valid', StackTrace.current);
     }
     isLoading = true;
     try {
@@ -57,7 +57,7 @@ class StatusNotifier extends StateNotifier<AsyncValue<List<Status>>> {
       state = AsyncValue.data(statuslist);
     } catch (error, _) {
       isLoading = false;
-      state = AsyncValue.error(error);
+      state = AsyncValue.error(error, StackTrace.current);
       if (loadmore) currentPage--;
     }
   }

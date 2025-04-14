@@ -1,5 +1,5 @@
-import 'package:elevent/model/status.dart';
-import 'package:elevent/parts/status.dart';
+import 'package:icp/model/status.dart';
+import 'package:icp/parts/status.dart';
 import 'package:flutter/material.dart';
 
 class StatusGrid extends StatelessWidget {

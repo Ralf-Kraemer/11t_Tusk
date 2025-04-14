@@ -12,7 +12,7 @@ class ApiActivityPub {
     var result;
 
     var baseurl = await helper.getPrefString('baseUrl');
-    var endpoint = baseurl! + API_BASE + API_TIMELINES_HOME;
+    var endpoint = baseurl! + '/' + API_BASE + API_TIMELINES_HOME;
 
     try {
       dynamic response = await httpClient.get(endpoint);
@@ -20,7 +20,7 @@ class ApiActivityPub {
         response.data.forEach((v) {
           try {
             result.add(Status.fromJson(v));
-          } catch (error, __) {
+          } catch (error) {
             // do not rethrow, status isn't added
             print(error.toString());
           }

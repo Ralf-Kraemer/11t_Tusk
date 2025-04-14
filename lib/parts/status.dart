@@ -1,4 +1,4 @@
-import 'package:elevent/model/status.dart';
+import 'package:icp/model/status.dart';
 import 'package:flutter/material.dart';
 
 class StatusWidget extends StatelessWidget {
