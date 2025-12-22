@@ -1,5 +1,4 @@
 import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -14,25 +13,27 @@ import 'pages/loginpage.dart';
 import 'utils/helper.dart';  // Assuming Helper class is in utils folder
 
 void main() {
-  runApp(ProviderScope(child: TuskApp()));
+  runApp(ProviderScope(child: WeCQApp()));
 }
 
-class TuskApp extends ConsumerStatefulWidget {
+class WeCQApp extends ConsumerStatefulWidget {
   @override
-  _TuskAppState createState() => _TuskAppState();
+  _WeCQAppState createState() => _WeCQAppState();
 }
 
-class _TuskAppState extends ConsumerState<TuskApp> {
+class _WeCQAppState extends ConsumerState<WeCQApp> {
   final appLinks = AppLinks();
   StreamSubscription? _sub;
   bool _isLoading = true;  // Add a loading state
   bool _userIsLoggedIn = false;
+
 
   @override
   void initState() {
     super.initState();
     _checkLoginStatus();  // Check if the user is logged in when the app starts
     _handleIncomingLinks();
+    
   }
 
   @override
@@ -45,25 +46,23 @@ class _TuskAppState extends ConsumerState<TuskApp> {
   Future<void> _checkLoginStatus() async {
     var accessToken = await Helper.get().getPrefString('accessToken');
     if (accessToken != null) {
-      // If there is an access token, try to validate it by calling the API or checking expiration
       var api = ApiOAuth();
       try {
-        bool isValid = await api.maybeRefreshAccessToken() != null; // Validate token
+        bool isValid = await api.maybeRefreshAccessToken() != null; 
         setState(() {
           _userIsLoggedIn = isValid;
-          _isLoading = false;  // Set loading to false once the login check is done
+          _isLoading = false;  
         });
       } catch (e) {
-        print("Error validating token: $e");
         setState(() {
           _userIsLoggedIn = false;
-          _isLoading = false;  // Set loading to false even if there's an error
+          _isLoading = false;  
         });
       }
     } else {
       setState(() {
         _userIsLoggedIn = false;
-        _isLoading = false;  // Set loading to false if no token exists
+        _isLoading = false;  
       });
     }
   }
@@ -86,13 +85,11 @@ class _TuskAppState extends ConsumerState<TuskApp> {
         });
       } catch (e) {
         print("Error exchanging code for tokens: $e");
-        // Handle error here, maybe show a dialog to the user or log it
       }
     } else {
       print("No authorization code found in the URI.");
     }
 
-    // Close browser only if it was opened.
     try {
       await FlutterWebBrowser.close();
     } catch (e) {
@@ -108,7 +105,6 @@ class _TuskAppState extends ConsumerState<TuskApp> {
     }, onError: (Object err) {
       if (!mounted) return;
       print('Error in handling incoming link: $err');
-      // Handle incoming link errors
     });
   }
 
@@ -116,20 +112,20 @@ class _TuskAppState extends ConsumerState<TuskApp> {
   Widget build(BuildContext context) {
     if (_isLoading) {
       return MaterialApp(
-        title: 'icp.social',
+        title: 'wecq.social',
         theme: AppTheme.lightTheme,
         darkTheme: AppTheme.darkTheme,
         home: Scaffold(
-          body: Center(child: CircularProgressIndicator()),  // Loading indicator while checking login status
+          body: Center(child: CircularProgressIndicator()),  
         ),
       );
     }
 
     return MaterialApp(
-      title: 'icp.social',
-      theme: AppTheme.lightTheme,
-      darkTheme: AppTheme.darkTheme,
-      home: _userIsLoggedIn ? HomePage() : LoginPage(),
-    );
+            title: 'wecq.social',
+            theme: AppTheme.lightTheme,
+            darkTheme: AppTheme.darkTheme,
+            home: _userIsLoggedIn ? HomePage() : LoginPage(),
+          );
   }
 }

@@ -7,7 +7,7 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>
-	<string>ICP</string>
+	<string>WeCQ</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
@@ -15,7 +15,23 @@
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>
-	<string>ICP</string>
+	<string>wecq</string>
+
+	<!-- URL scheme for wecq:// -->
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>CFBundleURLName</key>
+			<string>wecq</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>wecq</string>
+			</array>
+		</dict>
+	</array>
+
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
@@ -45,21 +61,5 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
-
-	<!-- ✅ Custom URI Scheme Support -->
-	<key>CFBundleURLTypes</key>
-	<array>
-		<dict>
-			<key>CFBundleTypeRole</key>
-			<string>Editor</string>
-			<key>CFBundleURLName</key>
-			<string>social.icp.app</string> <!-- Replace with your actual bundle identifier -->
-			<key>CFBundleURLSchemes</key>
-			<array>
-				<string>ICP</string> <!-- Replace 'myapp' with your actual URI scheme -->
-			</array>
-		</dict>
-	</array>
-
 </dict>
 </plist>

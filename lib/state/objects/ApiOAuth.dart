@@ -1,16 +1,12 @@
-import 'package:app_links/app_links.dart';
-import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
 class ApiOAuth {
-  final String _clientName = 'icp.social';
-  final String _clientWebsite = 'https://ralfkraemer.eu/icp';
-  final String _redirectUri = 'ICP://ralfkraemer.eu';
+  final String _clientName = 'wecq.social';
+  final String _clientWebsite = 'https://ralfkraemer.eu/wecq';
+  final String _redirectUri = 'wecq://ralfkraemer.eu';
   final String _scope = 'read write follow push';
-
-  final AppLinks _appLinks = AppLinks();
 
   // Helper class to store and retrieve data from SharedPreferences
   Future<String?> _getPrefString(String key) async {

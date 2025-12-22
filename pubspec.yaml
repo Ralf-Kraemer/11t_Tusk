@@ -1,5 +1,5 @@
-name: icp
-description: icp is an iOS and Android app for connecting to decentralized social networks like Mastodon, Tusk and the Fediverse.
+name: wecq
+description: WeCQ is an iOS and Android app for connecting to decentralized social networks like Mastodon, Tusk and the Fediverse.
 
 version: 2.0.0+35
 
@@ -10,18 +10,18 @@ dependencies:
   flutter:
     sdk: flutter
 
-  lints: ^5.1.1
+  lints: ^6.0.0
   dio: ^5.8.0
   json_annotation: ^4.9.0
   cached_network_image: ^3.4.1
-  flutter_riverpod: ^2.6.1
-  hooks_riverpod: ^2.6.1
-  riverpod_lint: ^2.6.5
-  package_info_plus: ^8.3.0
+  flutter_riverpod: ^3.0.3
+  hooks_riverpod: ^3.0.3
+  riverpod_lint: ^3.0.3
+  package_info_plus: ^9.0.0
   shared_preferences: ^2.0.6
   url_launcher: ^6.0.9
   flutter_web_browser: ^0.17.1
-  app_links: ^6.4.0
+  app_links: ^7.0.0
   better_player: 
     path: ../better_player
   dio_http_cache:
@@ -29,12 +29,12 @@ dependencies:
       url: https://github.com/Ralf-Kraemer/dio-http-cache.git
   toot_ui: 
     path: ../toot_ui
-  btox: 
-    path: ../bTox
   carousel_slider: ^5.0.0
   flutter_launcher_icons: ^0.14.3
   share_plus: ^10.1.4
   flutter_emoji: ^2.5.1
+  flutter_chat_ui: ^1.6.12
+  build_runner: ^2.5.4
 
 dev_dependencies:
   json_serializable: ^6.9.4
@@ -43,10 +43,10 @@ dev_dependencies:
 
 flutter:
   assets:
-    - assets/images/logo-icp.png
+    - assets/images/logo-wecq.png
   uses-material-design: true
 
 flutter_icons:
   android: "launcher_icon"
   ios: true
-  image_path: "assets/images/logo-icp.png"
+  image_path: "assets/images/logo-wecq.png"

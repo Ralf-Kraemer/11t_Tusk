@@ -1,64 +1,69 @@
-import 'package:icp/model/status.dart';
-import 'package:icp/state/objects/ApiOAuth.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-
+import 'package:wecq/model/status.dart';
+import 'package:wecq/state/objects/ApiOAuth.dart';
 import 'objects/ApiActivityPub.dart';
 
-final statusesProvider =
-    StateNotifierProvider<StatusNotifier, AsyncValue<List<Status>>>((reader) {
-  return StatusNotifier(reader);
-});
+/// Riverpod 3 AsyncNotifier provider
+final statusesProvider = AsyncNotifierProvider<StatusNotifier, List<Status>>(
+  () => StatusNotifier(),
+);
 
-class StatusNotifier extends StateNotifier<AsyncValue<List<Status>>> {
-  final Ref reader;
+class StatusNotifier extends AsyncNotifier<List<Status>> {
   final ApiActivityPub api = ApiActivityPub();
   final ApiOAuth oauth = ApiOAuth();
-  List<Status> statuslist = [];
 
-  int currentPage = 1;
-  bool isLoading = false;
+  List<Status> _statusList = [];
+  int _currentPage = 1;
+  bool _isLoading = false;
 
-  StatusNotifier(this.reader) : super(const AsyncValue.loading()) {
-    loadStatuses();
+  @override
+  Future<List<Status>> build() async {
+    // Called automatically when provider is first watched
+    return _retrieveStatuses(loadMore: false);
   }
 
-  Future<void> loadStatuses() async {
-    return await _retrieveStatuses(loadmore: false);
-  }
-
+  /// Load next page (for infinite scrolling)
   Future<void> loadNextStatuses() async {
-    return await _retrieveStatuses(loadmore: true);
+    await _retrieveStatuses(loadMore: true);
   }
 
-  Future<void> _retrieveStatuses({bool loadmore = false}) async {
-    if (isLoading) {
-      return;
-    }
-    if (loadmore) {
-      currentPage++;
+  /// Core method to fetch statuses from API
+  Future<List<Status>> _retrieveStatuses({bool loadMore = false}) async {
+    if (_isLoading) return _statusList;
+
+    _isLoading = true;
+
+    if (loadMore) {
+      _currentPage++;
     } else {
-      // we' reprobably refreshing if currentPage > 1
-      // reset to 1 to make sure more recent posts are loaded.
-      currentPage = 1;
+      _currentPage = 1;
     }
-    var access_token = await oauth.maybeRefreshAccessToken();
-    if (access_token == null) {
-      state = AsyncValue.error('Login not valid', StackTrace.current);
+
+    final accessToken = await oauth.maybeRefreshAccessToken();
+    if (accessToken == null) {
+      _isLoading = false;
+      throw Exception('Login not valid');
     }
-    isLoading = true;
+
     try {
-      final newStatuses = await api.getStatusList();
-      isLoading = false;
-      if (currentPage == 1) {
-        statuslist = newStatuses;
+      final newStatuses = await api.getStatusList(page: _currentPage);
+
+      if (_currentPage == 1) {
+        _statusList = newStatuses;
       } else {
-        statuslist = [...statuslist, ...newStatuses];
+        _statusList = [..._statusList, ...newStatuses];
       }
-      state = AsyncValue.data(statuslist);
-    } catch (error, _) {
-      isLoading = false;
-      state = AsyncValue.error(error, StackTrace.current);
-      if (loadmore) currentPage--;
+
+      // Update state in Riverpod 3
+      state = AsyncData(_statusList);
+
+      return _statusList;
+    } catch (error, stackTrace) {
+      if (loadMore) _currentPage--;
+      state = AsyncError(error, stackTrace);
+      rethrow;
+    } finally {
+      _isLoading = false;
     }
   }
 }

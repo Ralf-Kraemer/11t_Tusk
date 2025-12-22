@@ -1,107 +1,124 @@
 import 'package:flutter/material.dart';
-import 'package:better_player/better_player.dart';
 import 'dart:convert';
+import 'dart:math';
 import 'package:http/http.dart' as http;
+import 'videoplayercontainer.dart';
 
 class VideoPlayerScreen extends StatefulWidget {
-  final String videoUrl;
-  final int videoViewIndex;
-
-  const VideoPlayerScreen({Key? key, required this.videoUrl, required this.videoViewIndex}) : super(key: key);
+  const VideoPlayerScreen({super.key});
 
   @override
-  _VideoPlayerScreenState createState() => _VideoPlayerScreenState();
+  State<VideoPlayerScreen> createState() => _VideoPlayerScreenState();
 }
 
 class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
-  late BetterPlayerController _controller;
-  String? targetVideo;
-  bool _isLoading = true;
+  final List<Widget> watchQueue = [];
+  List<String> videoUris = [];
+  int seed = Random().nextInt(99);
 
   @override
   void initState() {
     super.initState();
-    _controller = BetterPlayerController(
-      BetterPlayerConfiguration(
-        aspectRatio: 9/16,
-        autoPlay: false,
-        looping: true,
-        controlsConfiguration: BetterPlayerControlsConfiguration(
-          enableFullscreen: true,
-          enablePlayPause: true,
-        ),
-      ),
-    );
-    loadVideo();
+    _updateWatchQueue(seed);
+    _updateWatchQueue(0);
   }
-/*
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-*/
-  Future<void> loadVideo() async {
-    targetVideo = widget.videoUrl.isNotEmpty
-        ? widget.videoUrl
-        : await curateVideo(widget.videoViewIndex);
 
-    if (targetVideo == null || targetVideo!.isEmpty) {
-      setState(() => _isLoading = false);
-      return;
+  Future<List<String>> _fetchPeerTubeVideoUrls(String instanceDomain, int _index, String search) async {
+    final searchUrl = Uri.https(instanceDomain, "api/v1/search/videos");
+    try {
+      final response = await http.get(searchUrl, headers: {
+        'count': '15',
+        'durationMax': '240',
+        'start': _index.toString(),
+        'sort': (seed % 5 > 2) ? '-publishedAt' : '-views',
+        'search': search,
+        'languageOneOf': 'en,de',
+      });
+
+      if (response.statusCode != 200) return [];
+      final data = json.decode(response.body);
+      if (data['data'].isEmpty) return [];
+
+      return List<String>.from(data['data'].map((item) => "$instanceDomain/api/v1/videos/${item['uuid']}"));
+    } catch (e) {
+      debugPrint("Failed to fetch video URLs: $e");
+      return [];
+    }
+  }
+
+  String _selectPeerTubeInstance() {
+    const instances = [
+      'tube.shanti.cafe',
+      'p.lu',
+      'peertube.1312.media',
+      'video.antopie.org',
+      'tilvids.com',
+      'videovortex.tv',
+      'video.infosec.exchange',
+      'peertube.ch',
+      'makertube.net',
+      'video.4d2.org',
+      'video.causa-arcana.com',
+      'watch.libertaria.space',
+      'tube.gayfr.online',
+      'peertube.expi.studio',
+      'video.coales.co',
+      'peertube.craftum.pl',
+      'peertube.keazilla.net',
+      'peertube.fedihub.online',
+      'tube.fediverse.games',
+      'videos.domainepublic.net',
+      'video.rubdos.be',
+      'peertube.tweb.tv',
+      'peertube.existiert.ch',
+      'video.liberta.vip',
+      'fediverse.tv',
+      'videos.trom.tf',
+      'peertube2.cpy.re',
+      'peertube3.cpy.re',
+      'framatube.org',
+      'tube.p2p.legal',
+      'peertube.gaialabs.ch',
+      'peertube.uno',
+      'peertube.slat.org',
+      'peertube.opencloud.lu',
+      'tube.nx-pod.de',
+      'video.hardlimit.com',
+      'tube.graz.social',
+      'p.eertu.be'
+    ];
+    return instances[Random().nextInt(instances.length)];
+  }
+
+  Future<void> _updateWatchQueue(int _index) async {
+
+    List<String> _videoUris = await _fetchPeerTubeVideoUrls(_selectPeerTubeInstance(), _index, '');
+
+    videoUris.addAll(_videoUris);
+
+    if(watchQueue.length >= 12) {
+      watchQueue.removeAt(0);
+    } else {
+        int _selector = Random().nextInt(videoUris.length);
+        watchQueue.add(VideoPlayerContainer(videoUri: videoUris[_selector], videoViewIndex: _index));
+        print(videoUris[_selector]);
+        videoUris.removeAt(_selector);
     }
 
-    _controller.setupDataSource(
-      BetterPlayerDataSource.network(
-        targetVideo!,
-        videoFormat: BetterPlayerVideoFormat.hls,
-        headers: {"User-Agent": "Flutter"},
-      ),
-    );
-
-    _controller.addEventsListener((event) {
-      if (event.betterPlayerEventType == BetterPlayerEventType.initialized) {
-        setState(() {
-          _isLoading = false;
-        });
-      }
+    setState(() {
+      seed = Random().nextInt(99);
     });
-  }
-
-  Future<String?> curateVideo(int seed) async {
-    String instance = (seed % 3 != 0) ? 'videovortex.tv' : 'videos.trom.tf';
-    return await getPeerTubeStreamUrl(instance, seed);
-  }
-
-  Future<String?> getPeerTubeStreamUrl(String instanceDomain, int seed) async {
-    final searchUrl = Uri.https(instanceDomain, "api/v1/videos");
-    final searchResponse = await http.get(searchUrl, headers: {'count': '1', 'start': '$seed'});
-
-    if (searchResponse.statusCode != 200) return null;
-
-    final searchResults = json.decode(searchResponse.body);
-    if (searchResults['data'].isEmpty) return null;
-
-    String videoId = searchResults['data'][0]['uuid'];
-    final videoUrl = Uri.https(instanceDomain, "api/v1/videos/$videoId");
-    final videoResponse = await http.get(videoUrl);
-    if (videoResponse.statusCode != 200) return null;
-
-    final videoData = json.decode(videoResponse.body);
-    return videoData['streamingPlaylists']?.isNotEmpty == true
-        ? videoData['streamingPlaylists'][0]['playlistUrl']
-        : null;
   }
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-        child: _isLoading
-            ? CircularProgressIndicator()
-            : (targetVideo != null && targetVideo!.isNotEmpty)
-                ? BetterPlayer(controller: _controller)
-                : Text("Failed to load video"),
-      
-    );
+    return watchQueue.isEmpty
+        ? const Center(child: CircularProgressIndicator())
+        : PageView.builder(
+            scrollDirection: Axis.vertical,
+            onPageChanged: _updateWatchQueue,
+            itemCount: watchQueue.length,
+            itemBuilder: (context, index) => watchQueue[index],
+          );
   }
 }
