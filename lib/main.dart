@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import 'package:flutter_web_browser/flutter_web_browser.dart';
 import 'package:app_links/app_links.dart';
@@ -10,122 +9,145 @@ import 'state/objects/ApiOAuth.dart';
 import 'AppTheme.dart';
 import 'pages/homepage.dart';
 import 'pages/loginpage.dart';
-import 'utils/helper.dart';  // Assuming Helper class is in utils folder
+import 'utils/helper.dart';
 
 void main() {
-  runApp(ProviderScope(child: WeCQApp()));
+  runApp(const ProviderScope(child: WeCQApp()));
 }
 
 class WeCQApp extends ConsumerStatefulWidget {
+  const WeCQApp({super.key});
+
   @override
-  _WeCQAppState createState() => _WeCQAppState();
+  ConsumerState<WeCQApp> createState() => _WeCQAppState();
 }
 
 class _WeCQAppState extends ConsumerState<WeCQApp> {
-  final appLinks = AppLinks();
-  StreamSubscription? _sub;
-  bool _isLoading = true;  // Add a loading state
-  bool _userIsLoggedIn = false;
+  final AppLinks _appLinks = AppLinks();
+  StreamSubscription<Uri?>? _linkSub;
 
+  bool _isLoading = true;
+  bool _userIsLoggedIn = false;
+  bool _authInProgress = false; // prevents races
 
   @override
   void initState() {
     super.initState();
-    _checkLoginStatus();  // Check if the user is logged in when the app starts
-    _handleIncomingLinks();
-    
+    _initializeApp();
   }
 
   @override
   void dispose() {
-    _sub?.cancel();
+    _linkSub?.cancel();
     super.dispose();
   }
 
-  // Method to check if a valid token exists in the storage
-  Future<void> _checkLoginStatus() async {
-    var accessToken = await Helper.get().getPrefString('accessToken');
-    if (accessToken != null) {
-      var api = ApiOAuth();
-      try {
-        bool isValid = await api.maybeRefreshAccessToken() != null; 
-        setState(() {
-          _userIsLoggedIn = isValid;
-          _isLoading = false;  
-        });
-      } catch (e) {
-        setState(() {
-          _userIsLoggedIn = false;
-          _isLoading = false;  
-        });
+  /// Single entry point for startup logic
+  Future<void> _initializeApp() async {
+    _listenForIncomingLinks();
+    await _checkLoginStatusSafely();
+  }
+
+  /// Defensive login check
+  Future<void> _checkLoginStatusSafely() async {
+    try {
+      final accessToken =
+          await Helper.get().getPrefString('accessToken');
+
+      if (accessToken == null) {
+        _setAuthState(loggedIn: false);
+        return;
       }
-    } else {
-      setState(() {
-        _userIsLoggedIn = false;
-        _isLoading = false;  
-      });
+
+      final api = ApiOAuth();
+
+      final isValid = await api.maybeRefreshAccessToken();
+
+      _setAuthState(loggedIn: isValid == true);
+    } catch (e, st) {
+      debugPrint('Auth check failed: $e\n$st');
+      _setAuthState(loggedIn: false);
     }
   }
 
-  String? extractCodeFromUri(Uri uri) {
-    var parameters = Uri.splitQueryString(uri.query);
-    return parameters.keys.contains('code') ? parameters['code'] : null;
+  void _setAuthState({required bool loggedIn}) {
+    if (!mounted) return;
+
+    setState(() {
+      _userIsLoggedIn = loggedIn;
+      _isLoading = false;
+    });
   }
 
-  Future<void> loadTokens(Uri? uri) async {
-    if (uri == null) return;
-    print(uri.toString());
-    var code = extractCodeFromUri(uri);
-    if (code != null) {
-      try {
-        var api = ApiOAuth();
-        await api.exchangeCodeForTokens(code);
-        setState(() {
-          _userIsLoggedIn = true;
-        });
-      } catch (e) {
-        print("Error exchanging code for tokens: $e");
-      }
-    } else {
-      print("No authorization code found in the URI.");
-    }
+  /// Extract OAuth code safely
+  String? _extractCode(Uri uri) {
+    return uri.queryParameters['code'];
+  }
+
+  /// Handles OAuth redirect
+  Future<void> _handleOAuthRedirect(Uri? uri) async {
+    if (uri == null || _authInProgress) return;
+
+    final code = _extractCode(uri);
+    if (code == null) return;
+
+    _authInProgress = true;
 
     try {
-      await FlutterWebBrowser.close();
-    } catch (e) {
-      print("Error closing web browser: $e");
+      final api = ApiOAuth();
+      await api.exchangeCodeForTokens(code);
+
+      if (!mounted) return;
+
+      setState(() {
+        _userIsLoggedIn = true;
+        _isLoading = false;
+      });
+    } catch (e, st) {
+      debugPrint('Token exchange failed: $e\n$st');
+    } finally {
+      _authInProgress = false;
+
+      try {
+        await FlutterWebBrowser.close();
+      } catch (_) {
+        // non-fatal
+      }
     }
   }
 
-  // Handle incoming links while the app is already started.
-  void _handleIncomingLinks() {
-    _sub = appLinks.uriLinkStream.listen((Uri? uri) {
-      if (!mounted) return;
-      loadTokens(uri);
-    }, onError: (Object err) {
-      if (!mounted) return;
-      print('Error in handling incoming link: $err');
-    });
+  /// Incoming deep link listener
+  void _listenForIncomingLinks() {
+    _linkSub = _appLinks.uriLinkStream.listen(
+      (uri) {
+        if (!mounted) return;
+        _handleOAuthRedirect(uri);
+      },
+      onError: (err, st) {
+        debugPrint('Deep link error: $err\n$st');
+      },
+    );
   }
 
   @override
   Widget build(BuildContext context) {
+
     if (_isLoading) {
       return MaterialApp(
         title: 'wecq.social',
         theme: AppTheme.lightTheme,
         darkTheme: AppTheme.darkTheme,
-        home: Scaffold(
-          body: Center(child: CircularProgressIndicator()),  
+        home: const Scaffold(
+          body: Center(child: CircularProgressIndicator()),
         ),
       );
     }
 
     return MaterialApp(
-            title: 'wecq.social',
-            theme: AppTheme.lightTheme,
-            darkTheme: AppTheme.darkTheme,
-            home: _userIsLoggedIn ? HomePage() : LoginPage(),
-          );
+      title: 'wecq.social',
+      theme: AppTheme.lightTheme,
+      darkTheme: AppTheme.darkTheme,
+      home: _userIsLoggedIn ? const HomePage() : LoginPage(),
+    );
   }
 }

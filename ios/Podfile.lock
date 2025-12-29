@@ -8,6 +8,12 @@ PODS:
     - HLSCachingReverseProxyServer
     - PINCache
   - Cache (6.0.0)
+  - CocoaAsyncSocket (7.6.5)
+  - CocoaLumberjack (3.9.0):
+    - CocoaLumberjack/Core (= 3.9.0)
+  - CocoaLumberjack/Core (3.9.0)
+  - CocoaLumberjack/Swift (3.9.0):
+    - CocoaLumberjack/Core
   - Flutter (1.0.0)
   - flutter_web_browser (0.17.3):
     - Flutter
@@ -17,6 +23,15 @@ PODS:
   - HLSCachingReverseProxyServer (0.1.0):
     - GCDWebServer (~> 3.5)
     - PINCache (>= 3.0.1-beta.3)
+  - KissXML (5.3.1):
+    - KissXML/All (= 5.3.1)
+  - KissXML/Additions (5.3.1):
+    - KissXML/Core
+  - KissXML/All (5.3.1):
+    - KissXML/Additions
+    - KissXML/Core
+  - KissXML/Core (5.3.1)
+  - libidn (1.35)
   - package_info_plus (0.4.5):
     - Flutter
   - path_provider_foundation (0.0.1):
@@ -42,6 +57,17 @@ PODS:
     - Flutter
   - wakelock_plus (0.0.1):
     - Flutter
+  - xmpp_plugin (2.2.13):
+    - Flutter
+    - XMPPFramework/Swift
+  - XMPPFramework/default (4.0.0):
+    - CocoaAsyncSocket (~> 7.6)
+    - CocoaLumberjack
+    - KissXML (~> 5.2)
+    - libidn (~> 1.35)
+  - XMPPFramework/Swift (4.0.0):
+    - CocoaLumberjack/Swift
+    - XMPPFramework/default
 
 DEPENDENCIES:
   - app_links (from `.symlinks/plugins/app_links/ios`)
@@ -55,14 +81,20 @@ DEPENDENCIES:
   - sqflite_darwin (from `.symlinks/plugins/sqflite_darwin/darwin`)
   - url_launcher_ios (from `.symlinks/plugins/url_launcher_ios/ios`)
   - wakelock_plus (from `.symlinks/plugins/wakelock_plus/ios`)
+  - xmpp_plugin (from `.symlinks/plugins/xmpp_plugin/ios`)
 
 SPEC REPOS:
   trunk:
     - Cache
+    - CocoaAsyncSocket
+    - CocoaLumberjack
     - GCDWebServer
     - HLSCachingReverseProxyServer
+    - KissXML
+    - libidn
     - PINCache
     - PINOperation
+    - XMPPFramework
 
 EXTERNAL SOURCES:
   app_links:
@@ -87,15 +119,21 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/url_launcher_ios/ios"
   wakelock_plus:
     :path: ".symlinks/plugins/wakelock_plus/ios"
+  xmpp_plugin:
+    :path: ".symlinks/plugins/xmpp_plugin/ios"
 
 SPEC CHECKSUMS:
   app_links: a754cbec3c255bd4bbb4d236ecc06f28cd9a7ce8
   better_player: 472a1f3471b8991bde82327c91498b0f7934245d
   Cache: 4ca7e00363fca5455f26534e5607634c820ffc2d
+  CocoaAsyncSocket: 065fd1e645c7abab64f7a6a2007a48038fdc6a99
+  CocoaLumberjack: 5644158777912b7de7469fa881f8a3f259c2512a
   Flutter: cabc95a1d2626b1b06e7179b784ebcf0c0cde467
   flutter_web_browser: 68b27d2c4773b059cef19e12c890cb204518d3c3
   GCDWebServer: 2c156a56c8226e2d5c0c3f208a3621ccffbe3ce4
   HLSCachingReverseProxyServer: 59935e1e0244ad7f3375d75b5ef46e8eb26ab181
+  KissXML: 5c8e0f2e8b9f071d3e1ae123dec3eb5da615c10c
+  libidn: e4576a956b797c584c77aaedfc6e3dd639b61bdc
   package_info_plus: af8e2ca6888548050f16fa2f1938db7b5a5df499
   path_provider_foundation: bb55f6dbba17d0dccd6737fe6f7f34fbd0376880
   PINCache: d9a87a0ff397acffe9e2f0db972ac14680441158
@@ -105,7 +143,9 @@ SPEC CHECKSUMS:
   sqflite_darwin: 20b2a3a3b70e43edae938624ce550a3cbf66a3d0
   url_launcher_ios: 7a95fa5b60cc718a708b8f2966718e93db0cef1b
   wakelock_plus: e29112ab3ef0b318e58cfa5c32326458be66b556
+  xmpp_plugin: 2991502c1939ae5060161fcd5cc126ad93063b95
+  XMPPFramework: 5d31ff9f73dce031b24bc49bcf88093627a3a86e
 
-PODFILE CHECKSUM: 3c63482e143d1b91d2d2560aee9fb04ecc74ac7e
+PODFILE CHECKSUM: 9c8c27139167795eebaa5a0d7594bdfdc28ff10d
 
 COCOAPODS: 1.16.2

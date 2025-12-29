@@ -1,5 +1,6 @@
 // helper.dart
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:wecq/state/objects/XMPPManager.dart';
 
 class Helper {
   static final Helper _instance = Helper._internal();
@@ -111,4 +112,17 @@ class Helper {
     final prefs = await SharedPreferences.getInstance();
     return prefs.clear();
   }
+
+
+  XmppManager connectToXmpp(String username, String password, String host) {
+    final xmppManager = XmppManager();
+    xmppManager.connect(
+      username: username,
+      password: password,
+      host: host,
+    );
+    return xmppManager;
+  }
+
+  
 }
