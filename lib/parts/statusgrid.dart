@@ -1,5 +1,5 @@
-import 'package:wecq/model/status.dart';
-import 'package:wecq/parts/status.dart';
+import 'package:iqon/model/status.dart';
+import 'package:iqon/parts/status.dart';
 import 'package:flutter/material.dart';
 
 class StatusGrid extends StatelessWidget {

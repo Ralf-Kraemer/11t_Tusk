@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_web_browser/flutter_web_browser.dart';
-import 'package:wecq/pages/homepage.dart';
+import 'package:iqon/pages/homepage.dart';
 
 import '../state/objects/ApiOAuth.dart';
 import '../utils/helper.dart';
@@ -93,7 +93,7 @@ class _LoginPageState extends State<LoginPage> {
 
   void handleInitialDeepLink() async {
     final uri = Uri.base;
-    if (uri.scheme == 'wecq' && uri.queryParameters.containsKey('code')) {
+    if (uri.scheme == 'iqon' && uri.queryParameters.containsKey('code')) {
       final code = uri.queryParameters['code'];
       if (code != null) {
         try {
@@ -178,11 +178,11 @@ class _LoginPageState extends State<LoginPage> {
                   children: [
                     const LogoLoading(),
                     const SizedBox(height: 16),
-                    SizedBox(height: 48, child: Text("WeCQ", style: titleStyle)),
+                    SizedBox(height: 48, child: Text("iQon", style: titleStyle)),
                     TextButton(
-                      onPressed: () => prepareLogin("https://wecq.social"),
-                      style: ButtonStyle(backgroundColor: MaterialStatePropertyAll(cs.primary)),
-                      child: Text('🌼 Connect with wecq.social', style: buttonTextStyle),
+                      onPressed: () => prepareLogin("https://iqon.social"),
+                      style: ButtonStyle(backgroundColor: WidgetStatePropertyAll(cs.primary)),
+                      child: Text(' Connect with iqon.social', style: buttonTextStyle),
                     ),
                     const SizedBox(height: 36),
                     Text("OR", style: subtitleStyle),

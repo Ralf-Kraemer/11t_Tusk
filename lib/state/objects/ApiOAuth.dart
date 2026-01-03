@@ -3,9 +3,9 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 
 class ApiOAuth {
-  final String _clientName = 'wecq.social';
-  final String _clientWebsite = 'https://ralfkraemer.eu/wecq';
-  final String _redirectUri = 'wecq://ralfkraemer.eu';
+  final String _clientName = 'iqon';
+  final String _clientWebsite = 'https://ralfkraemer.eu/iqon';
+  final String _redirectUri = 'iqon://ralfkraemer.eu';
   final String _scope = 'read write follow push';
 
   // Helper class to store and retrieve data from SharedPreferences

@@ -1,6 +1,6 @@
 import '../../model/status.dart';
 import '../../utils/constants.dart';
-import '../../utils/helper.dart';
+import 'package:toot_ui/helper.dart';
 import '../../utils/httpclient.dart';
 
 class ApiActivityPub {

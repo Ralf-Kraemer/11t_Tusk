@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:wecq/parts/chatlogin.dart';
-import 'package:wecq/state/apistate.dart';
-import 'package:wecq/state/objects/MatrixManager.dart';
+import 'package:iqon/parts/chatlogin.dart';
+import 'package:iqon/state/apistate.dart';
+import 'package:iqon/state/objects/MatrixManager.dart';
 import '../utils/helper.dart';
 
-import 'package:wecq/parts/MastodonFeed.dart';
-import 'package:wecq/parts/scope.dart';
-import 'package:wecq/parts/chatlistview.dart';
-import 'package:wecq/parts/videoplayerscreen.dart';
+import 'package:iqon/parts/MastodonFeed.dart';
+import 'package:iqon/parts/scope.dart';
+import 'package:iqon/parts/chatlistview.dart';
+import 'package:iqon/parts/videoplayerscreen.dart';
 
 class HomePage extends ConsumerStatefulWidget {
   const HomePage({super.key});

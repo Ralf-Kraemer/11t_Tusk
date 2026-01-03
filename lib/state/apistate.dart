@@ -1,6 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:wecq/model/status.dart';
-import 'package:wecq/state/objects/ApiOAuth.dart';
+import 'package:iqon/model/status.dart';
+import 'package:iqon/state/objects/ApiOAuth.dart';
 import 'objects/ApiActivityPub.dart';
 
 /// Riverpod 3 AsyncNotifier provider

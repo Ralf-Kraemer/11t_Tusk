@@ -34,11 +34,9 @@ class AppTheme {
     colorScheme: const ColorScheme.light(
       primary: primary,
       secondary: secondary,
-      background: lightBackground,
       surface: lightSurface,
       onPrimary: Colors.white,
       onSecondary: Colors.white,
-      onBackground: Colors.black87,
       onSurface: Colors.black87,
     ),
 
@@ -117,11 +115,9 @@ class AppTheme {
     colorScheme: const ColorScheme.dark(
       primary: primary,
       secondary: secondary,
-      background: darkBackground,
       surface: darkSurface,
       onPrimary: Colors.white,
       onSecondary: Colors.white,
-      onBackground: Colors.white70,
       onSurface: Colors.white70,
     ),
 

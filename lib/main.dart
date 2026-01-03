@@ -9,20 +9,20 @@ import 'state/objects/ApiOAuth.dart';
 import 'AppTheme.dart';
 import 'pages/homepage.dart';
 import 'pages/loginpage.dart';
-import 'utils/helper.dart';
+import 'package:toot_ui/helper.dart';
 
 void main() {
-  runApp(const ProviderScope(child: WeCQApp()));
+  runApp(const ProviderScope(child: iQonApp()));
 }
 
-class WeCQApp extends ConsumerStatefulWidget {
-  const WeCQApp({super.key});
+class iQonApp extends ConsumerStatefulWidget {
+  const iQonApp({super.key});
 
   @override
-  ConsumerState<WeCQApp> createState() => _WeCQAppState();
+  ConsumerState<iQonApp> createState() => _iQonAppState();
 }
 
-class _WeCQAppState extends ConsumerState<WeCQApp> {
+class _iQonAppState extends ConsumerState<iQonApp> {
   final AppLinks _appLinks = AppLinks();
   StreamSubscription<Uri?>? _linkSub;
 
@@ -134,7 +134,7 @@ class _WeCQAppState extends ConsumerState<WeCQApp> {
 
     if (_isLoading) {
       return MaterialApp(
-        title: 'wecq.social',
+        title: 'iQon',
         theme: AppTheme.lightTheme,
         darkTheme: AppTheme.darkTheme,
         home: const Scaffold(
@@ -144,7 +144,7 @@ class _WeCQAppState extends ConsumerState<WeCQApp> {
     }
 
     return MaterialApp(
-      title: 'wecq.social',
+      title: 'iQon',
       theme: AppTheme.lightTheme,
       darkTheme: AppTheme.darkTheme,
       home: _userIsLoggedIn ? const HomePage() : LoginPage(),

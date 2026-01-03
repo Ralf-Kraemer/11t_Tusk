@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:wecq/utils/helper.dart';
+import 'package:iqon/utils/helper.dart';
 
 class Scope extends StatefulWidget {
   const Scope({super.key});

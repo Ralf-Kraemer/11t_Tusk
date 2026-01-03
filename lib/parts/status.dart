@@ -1,4 +1,4 @@
-import 'package:wecq/model/status.dart';
+import 'package:iqon/model/status.dart';
 import 'package:flutter/material.dart';
 
 class StatusWidget extends StatelessWidget {

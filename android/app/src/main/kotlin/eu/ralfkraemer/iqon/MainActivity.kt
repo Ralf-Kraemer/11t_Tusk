@@ -1,4 +1,4 @@
-package eu.ralfkraemer.wecq
+package eu.ralfkraemer.iqon
 
 import io.flutter.embedding.android.FlutterActivity
 

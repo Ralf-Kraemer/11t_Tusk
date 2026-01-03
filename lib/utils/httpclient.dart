@@ -1,6 +1,5 @@
 import 'package:dio/dio.dart';
-
-import 'helper.dart';
+import 'package:toot_ui/helper.dart';
 
 class HttpClient {
   Dio dio = Dio();

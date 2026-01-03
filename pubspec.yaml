@@ -1,5 +1,5 @@
-name: wecq
-description: WeCQ is an iOS and Android app for connecting to decentralized social networks like Mastodon, Tusk and the Fediverse.
+name: iqon
+description: antiQ is an iOS and Android app for connecting to decentralized social networks like Mastodon, Tusk and the Fediverse.
 publish_to: none
 
 version: 2.0.0+35
@@ -36,6 +36,8 @@ dependencies:
   flutter_emoji: ^2.5.1
   build_runner: ^2.5.4
   matrix: ^4.1.0
+  rename_flutter_project: ^1.0.2
+  change_app_package_name: ^1.5.0
   
 
 dev_dependencies:
