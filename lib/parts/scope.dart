@@ -12,11 +12,6 @@ class _ScopeState extends State<Scope> {
 
   final Helper helper = Helper.get();
 
-  Future<String> _homeInstanceQuery() async {
-    String? homeInstanceName = await helper.getHomeInstanceName();
-    return homeInstanceName ?? '';
-  }
-
   @override
   Widget build(BuildContext context) {
     return Column(

@@ -34,14 +34,9 @@ dependencies:
   flutter_launcher_icons: ^0.14.3
   share_plus: ^10.1.4
   flutter_emoji: ^2.5.1
-  flutter_chat_ui: ^2.11.1
   build_runner: ^2.5.4
-  flutter_chat_core: ^2.9.0
-  flutter_chat_types: ^3.6.2
-  xmpp_plugin:
-    git:
-      url: https://github.com/Ralf-Kraemer/xmpp_plugin.git
-      ref: master
+  matrix: ^4.1.0
+  
 
 dev_dependencies:
   json_serializable: ^6.9.4

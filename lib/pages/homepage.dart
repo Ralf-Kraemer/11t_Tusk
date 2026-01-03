@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:wecq/parts/chatlogin.dart';
 import 'package:wecq/state/apistate.dart';
-import 'package:wecq/state/objects/XMPPManager.dart';
+import 'package:wecq/state/objects/MatrixManager.dart';
 import '../utils/helper.dart';
 
 import 'package:wecq/parts/MastodonFeed.dart';
 import 'package:wecq/parts/scope.dart';
-import 'package:wecq/parts/contactlistview.dart';
-import 'package:wecq/model/contact.dart';
+import 'package:wecq/parts/chatlistview.dart';
 import 'package:wecq/parts/videoplayerscreen.dart';
 
 class HomePage extends ConsumerStatefulWidget {
@@ -21,8 +21,8 @@ class _NavigationWrapperState extends ConsumerState<HomePage> {
   int currentPageIndex = 0;
   final Helper helper = Helper.get();
 
-  late final XmppManager xmppManager;
-  bool xmppReady = false; // Track if the connection is ready
+  late final MatrixManager matrix = MatrixManager();
+  bool _chatReady = false; // Track if the connection is ready
 
   // Pre-create navigation buttons
   late final List<NavigationDestination> navigationButtons;
@@ -69,42 +69,35 @@ class _NavigationWrapperState extends ConsumerState<HomePage> {
       ),
     ];
 
-    // Start XMPP connection safely
-    _initXmpp();
+    // Start Chat connection safely
+    _initChat();
   }
 
-  Future<void> _initXmpp() async {
+  Future<void> _initChat() async {
     try {
       // Returns manager immediately, starts connection internally
-      xmppManager = helper.connectToXmpp(
-        'ralfkraemer',
-        'sweepsweep123',
-        'chatterboxtown.us',
-      );
+      matrix.init();
 
-      // Optional: if XmppManager provides a Future for when connected, await here
-      // await xmppManager.waitUntilConnected();
+      // Optional: if matrix provides a Future for when connected, await here
+      // await matrix.waitUntilConnected();
 
-      // Set ready to true immediately, since helper.connectToXmpp already starts it
+      // Set ready to true immediately, since helper.connectToChat already starts it
       setState(() {
-        xmppReady = true;
+        _chatReady = true;
       });
     } catch (e) {
-      debugPrint('XMPP connection failed: $e');
-      // Keep xmppReady false, Chat page can show an error
+      debugPrint('Chat connection failed: $e');
+      // Keep _chatReady false, Chat page can show an error
     }
   }
 
   List<Widget> get pages => [
         const MastodonFeed(),
         const Scope(),
-        xmppReady
-            ? ContactListView(
-                manualContacts: [Contact(jid: 'supertestomat@5222.de', name: 'Bob the Builder')],
-                incomingMessages: xmppManager.messages,
-                selfJid: 'ralfkraemer@5222.de/Flutter',
-                xmppManager: xmppManager,
-              )
+        _chatReady
+            ? matrix.isLoggedIn
+              ? const ChatListView()
+              : const ChatLogin()
             : const Center(child: CircularProgressIndicator()),
         VideoPlayerScreen(),
         Padding(
