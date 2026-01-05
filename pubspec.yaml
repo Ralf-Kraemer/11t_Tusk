@@ -29,7 +29,8 @@ dependencies:
     git:
       url: https://github.com/Ralf-Kraemer/dio-http-cache.git
   toot_ui: 
-    path: ../toot_ui
+    git:
+      url: https://github.com/Ralf-Kraemer/toot_ui
   carousel_slider: ^5.0.0
   flutter_launcher_icons: ^0.14.3
   share_plus: ^10.1.4
